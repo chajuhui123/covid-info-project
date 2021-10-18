@@ -3,17 +3,7 @@ import {Bar} from 'react-chartjs-2'
 import axios from 'axios';
 
 const Contents = () => {
-    const [confirmedData, setConfirmedData] = useState({
-        labels : ["1월", "2월", "3월"],
-        datasets : [
-            {
-                label : "국내 누적 확진자",
-                backgroundcolor : "salmon",
-                fill : true,
-                data : [10, 5, 3],
-            },
-        ],
-    });
+    const [confirmedData, setConfirmedData] = useState({});
     const options = {
         plugins: {
             title: { display: true, text: "누적 확진자 추이", fontSize: 16 },
@@ -36,10 +26,11 @@ const Contents = () => {
                 const active = cur.Active;
                 const death = cur.Deaths;
                 const recovered = cur.Recovered;
-                const findItem = acc.find(a=> a.year === year && a.month === month && a.date === date);
+                
+                const findItem = acc.find(a=> a.year === year && a.month === month);
 
-                if (!findItem){
-                    arr.push({year, month, date, confirmed, active, death, recovered});
+                if (!findItem && year === 2021){
+                    acc.push({year, month, date, confirmed, active, death, recovered});
                 }
                 if (findItem && findItem.date < date){
                     findItem.year = year;
@@ -50,10 +41,22 @@ const Contents = () => {
                     findItem.death = death;
                     findItem.recovered = recovered;
                 }
-
-                console.log(year, month, date);
-                return cur;
+                return acc;
             }, []);
+
+            console.log(arr);
+
+            setConfirmedData({
+                lables : arr.map((a)=> `${a.month+1}월`),
+                datasets : [
+                    {
+                        label : "국내 누적 확진자",
+                        backgroundcolor : "salmon",
+                        fill:true,
+                        data : arr.map((a)=> a.confirmed),
+                    },
+                ]
+            });
         }
         fetchEvent()
     })
@@ -63,7 +66,7 @@ const Contents = () => {
             <h2>국내 코로나 현황</h2>
             <div className = "contents">
                 <div>
-                <Bar data={confirmedData} options={options}/>
+                    <Bar data={confirmedData} options={options}/>
                 </div>
             </div>
        </section>
